@@ -1,0 +1,69 @@
+body {
+    background: linear-gradient(-45deg, #1e3c72, #2a5298, #6a11cb, #2575fc);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
+  }
+  
+  @keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  
+
+#navbar {
+    height: 50px; /* Adjust height */
+    padding: 5px 20px; /* Reduce padding */
+    display: flex;
+    align-items: center;
+    background-color:  #f8f9fa; 
+}
+
+.bg-dark {
+    background-color: #222; /* Maintain contrast */
+    color: #ccc; /* Ensure readability */
+    text-align: center;
+    padding: 8px 15px; /* Reduce padding */
+    font-size: 12px; /* Reduce text size */
+}
+
+.bg-dark a {
+    color: #ffffff;
+    margin: 0 10px; /* Add spacing between links */
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.bg-dark a:hover {
+    text-decoration: underline;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-radius: 25px;
+    padding: 10px 20px;
+    transition: 0.3s ease-in-out;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.card {
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    background: #fff;
+    color: #333;
+    transition: transform 0.3s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.brand-name {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: black; /* Ensure text appears in black */
+}
