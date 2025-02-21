@@ -1,5 +1,3 @@
-import dotenv from 'dotenv';
-dotenv.config();
 import express, { json } from 'express';
 import { createConnection } from 'mysql2';
 import { hash, compare } from 'bcrypt';
@@ -8,6 +6,7 @@ import session from 'express-session';
 import cors from 'cors';
 
 const app = express();
+const SESSION_SECRET='fc8b779b127ef4c71de20b211af689d4225d7e9a7603e5e4b9a68dbb6c1b44fe0eafb702b097f778ec4ea3153ee1fa6175f8f56fdb905496cfb9b2d36f21a12b';
 
 /// Middleware
 app.use(json());
@@ -16,7 +15,7 @@ app.use(cookieParser());
 
 app.use(
   session({
-    secret: process.env.SESSION_SECRET, // This uses the session secret from .env
+    secret: SESSION_SECRET, // This uses the session secret from .env
     resave: false,
     saveUninitialized: true,
     cookie: { secure: true },  // Set to true when using HTTPS
@@ -38,16 +37,16 @@ db.connect((err) => {
 
 // Login route
 app.post('/api/login', async (req, res) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body;
 
-  if (!username || !password) {
+  if (!email || !password) {
     return res.status(400).json({ message: 'Username and password required' });
   }
 
   // Query the database to find the user
   db.query(
-    'SELECT * FROM login WHERE username = ?',
-    [username],
+    'SELECT * FROM login WHERE email = ?',
+    [email],
     async (err, results) => {
       if (err) {
         return res.status(500).json({ message: 'Database error' });
@@ -81,7 +80,7 @@ app.get('/api/me', (req, res) => {
   }
 
   // Query user info from the database
-  db.query('SELECT id, username FROM login WHERE id = ?', [userId], (err, results) => {
+  db.query('SELECT id, email FROM login WHERE id = ?', [userId], (err, results) => {
     if (err) {
       return res.status(500).json({ message: 'Database error' });
     }
@@ -108,9 +107,9 @@ app.post('/api/logout', (req, res) => {
 
 // Register route
 app.post('/api/register', async (req, res) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body;
 
-  if (!username || !password) {
+  if (!email || !password) {
     return res.status(400).json({ message: 'Username and password required' });
   }
 
@@ -120,8 +119,8 @@ app.post('/api/register', async (req, res) => {
 
     // Insert the new user into the database
     db.query(
-      'INSERT INTO login (username, password) VALUES (?, ?)',
-      [username, hashedPassword],
+      'INSERT INTO login (email, password) VALUES (?, ?)',
+      [email, hashedPassword],
       (err, results) => {
         if (err) {
           console.error(err);
