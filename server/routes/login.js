@@ -1,132 +1,79 @@
-const express = require('express');
-const mysql = require('mysql2');
-const cookieParser = require('cookie-parser');
-const bcrypt = require('bcryptjs');
-const session = require('express-session');
+import express from 'express';
+import { createConnection } from 'mysql2';
+import { hash, compare } from 'bcrypt';
+import cookieParser from 'cookie-parser';
+import session from 'express-session';
+import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
-
-// MySQL connection
-const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'pritiag23092004',
-  database: 'securebank',
-});
+const SESSION_SECRET = 'fc8b779b127ef4c71de20b211af689d4225d7e9a7603e5e4b9a68dbb6c1b44fe0eafb702b097f778ec4ea3153ee1fa6175f8f56fdb905496cfb9b2d36f21a12b';
 
 // Middleware
 app.use(express.json());
+app.use(cors());
 app.use(cookieParser());
 app.use(
   session({
-    secret: 'your_secret_key',
+    secret: SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false }, // Set secure to true if you're using HTTPS
+    cookie: { secure: false } // set to true if using HTTPS
   })
 );
 
+// Serve static files from the "public" directory
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Serve index.html on the root route
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Connect to MySQL
+const db = createConnection({
+  host: "localhost",
+  user: "root", 
+  password: "pritiag23092004", 
+  database: "securebank",
+});
+
+db.connect((err) => {
+  if (err) console.error('Database connection failed:', err);
+  else console.log('Connected to MySQL');
+});
+
 // Login route
 app.post('/api/login', async (req, res) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body;
 
-  if (!username || !password) {
-    return res.status(400).json({ message: 'Username and password required' });
+  if (!email || !password) {
+    return res.status(400).json({ message: 'Email and password required' });
   }
 
-  // Query the database to find the user
-  db.query(
-    'SELECT * FROM login WHERE username = ?',
-    [username],
-    async (err, results) => {
-      if (err) {
-        return res.status(500).json({ message: 'Database error' });
-      }
-
-      const user = results[0];
-      if (!user) {
-        return res.status(401).json({ message: 'Invalid credentials' });
-      }
-
-      // Compare password using bcrypt
-      const isPasswordValid = await bcrypt.compare(password, user.password);
-      if (!isPasswordValid) {
-        return res.status(401).json({ message: 'Invalid credentials' });
-      }
-
-      // Store the user ID in session
-      req.session.userId = user.id;
-      res.cookie('user_id', user.id, { httpOnly: true, maxAge: 3600000 }); // 1 hour
-      return res.status(200).json({ message: 'Login successful' });
-    }
-  );
-});
-
-// Me route (retrieve current user info)
-app.get('/api/me', (req, res) => {
-  const userId = req.session.userId;
-
-  if (!userId) {
-    return res.status(401).json({ message: 'Not authenticated' });
-  }
-
-  // Query user info from the database
-  db.query('SELECT id, username FROM login WHERE id = ?', [userId], (err, results) => {
-    if (err) {
-      return res.status(500).json({ message: 'Database error' });
-    }
-
+  db.query('SELECT * FROM login WHERE email = ?', [email], async (err, results) => {
+    if (err) return res.status(500).json({ message: 'Database error' });
     const user = results[0];
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
+    if (!user) return res.status(401).json({ message: 'Invalid credentials' });
 
-    return res.json(user);
+    const isPasswordValid = await compare(password, user.password);
+    if (!isPasswordValid) return res.status(401).json({ message: 'Invalid credentials' });
+
+    req.session.userId = user.id;
+    res.cookie('user_id', user.id, { httpOnly: true, maxAge: 3600000 }); // 1 hour
+
+    return res.status(200).json({ message: 'Log in successful' });
   });
 });
 
-// Logout route
-app.post('/api/logout', (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      return res.status(500).json({ message: 'Failed to log out' });
-    }
-    res.clearCookie('user_id');
-    return res.status(200).json({ message: 'Logged out successfully' });
-  });
-});
+// Additional routes (me, logout, register) can go here...
 
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
-app.post('/api/register', async (req, res) => {
-    const { username, password } = req.body;
-  
-    if (!username || !password) {
-      return res.status(400).json({ message: 'Username and password required' });
-    }
-  
-    try {
-      // Hash the password before storing it
-      const hashedPassword = await bcrypt.hash(password, 10);
-  
-      // Insert the new user into the database
-      db.query(
-        'INSERT INTO login (username, password) VALUES (?, ?)',
-        [username, hashedPassword],
-        (err, results) => {
-          if (err) {
-            console.error(err);
-            return res.status(500).json({ message: 'Database error' });
-          }
-          res.status(201).json({ message: 'User registered successfully' });
-        }
-      );
-    } catch (error) {
-      res.status(500).json({ message: 'Error hashing password' });
-    }
-  });
-  
