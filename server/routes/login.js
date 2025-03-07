@@ -36,12 +36,11 @@ app.use((req, res, next) => {
 // Serve static files from "public" folder
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ✅ Load `index.html` as the first page
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// ✅ MySQL Database Connection
+//Database Connection
 const db = mysql.createConnection({
     host: "localhost",
     user: "root",
@@ -54,7 +53,7 @@ db.connect(err => {
     else console.log('Connected to MySQL');
 });
 
-// ✅ Login Route
+//Login Route
 app.post('/api/login', (req, res) => {
     const { email, password } = req.body;
 
@@ -81,7 +80,7 @@ app.post('/api/login', (req, res) => {
     });
 });
 
-// ✅ Logout Route (Destroy session completely)
+//Logout Route (Destroy session completely)
 app.get('/api/logout', (req, res) => {
     req.session.destroy(err => {
         if (err) return res.status(500).json({ message: "Logout failed" });
@@ -93,7 +92,7 @@ app.get('/api/logout', (req, res) => {
     });
 });
 
-// ✅ Route to check if user is logged in
+//Route to check if user is logged in
 app.get('/api/me', (req, res) => {
     if (!req.session.userId) {
         return res.status(401).json({ loggedIn: false, message: 'Not authenticated' });
@@ -107,7 +106,7 @@ app.get('/api/me', (req, res) => {
     });
 });
 
-// ✅ Protect the user dashboard route
+//Protect the user dashboard route
 app.get('/userboard.html', (req, res) => {
     if (!req.session.userId) {
         return res.redirect('/userLG.html'); // Redirect to login page if not authenticated
@@ -115,7 +114,7 @@ app.get('/userboard.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'userboard.html'));
 });
 
-// Start server
+// Start server on port 3000
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });

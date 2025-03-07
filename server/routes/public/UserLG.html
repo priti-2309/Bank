@@ -67,9 +67,9 @@
         const data = await response.json();
 
         if (response.ok) {
-            window.location.href = data.redirect; // Redirect to userboard.html
+            window.location.href = data.redirect; 
         } else {
-            alert(data.message); // Show error if login fails
+            alert(data.message); 
         }
     });
 </script>
