@@ -53,6 +53,35 @@ db.connect(err => {
     else console.log('Connected to MySQL');
 });
 
+// Register route
+app.post('/api/register', async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ message: 'Email and password required' });
+  }
+
+  try {
+    // Hash the password before storing it
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Insert the new user into the database
+    db.query(
+      'INSERT INTO login (email, password) VALUES (?, ?)',
+      [email, hashedPassword],
+      (err, results) => {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({ message: 'Database error' });
+        }
+        res.status(201).json({ message: 'User registered successfully' });
+      }
+    );
+  } catch (error) {
+    res.status(500).json({ message: 'Error hashing password' });
+  }
+});
+
 //Login Route
 app.post('/api/login', (req, res) => {
     const { email, password } = req.body;
@@ -113,6 +142,45 @@ app.get('/userboard.html', (req, res) => {
     }
     res.sendFile(path.join(__dirname, 'public', 'userboard.html'));
 });
+
+//Admin login route
+app.post('/api/admin/login', (req, res) => {
+    const { email, password } = req.body;
+
+    // Hardcoded Admin Credentials
+    const ADMIN_EMAIL = "admin@gmail.com";
+    const ADMIN_PASSWORD = "admin#123"; // Store hashed password in real applications
+
+    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+        // Store admin session
+        req.session.adminId = "admin";
+        res.cookie('admin_id', "admin", { httpOnly: true, maxAge: 3600000 });
+
+        return res.status(200).json({ success: true, redirect: '/adminboard.html' });
+    } else {
+        return res.status(401).json({ message: 'Invalid admin credentials' });
+    }
+});
+
+//Admin logout route
+app.get('/api/admin/logout', (req, res) => {
+    req.session.destroy(err => {
+        if (err) return res.status(500).json({ message: "Logout failed" });
+
+        res.clearCookie('admin_id'); // Clear session
+        return res.json({ success: true, redirect: '/index.html' });
+    });
+});
+
+//to protect admin dashboard
+app.get('/adminboard.html', (req, res) => {
+    if (!req.session.adminId) {
+        return res.redirect('/AdminLG.html'); // Redirect to login if not authenticated
+    }
+    res.sendFile(path.join(__dirname, 'public', 'adminboard.html'));
+});
+
+
 
 // Start server on port 3000
 app.listen(PORT, () => {
