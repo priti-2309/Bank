@@ -180,6 +180,24 @@ app.get('/adminboard.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'adminboard.html'));
 });
 
+//EJS route for employee data
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views')); // Ensure your 'views' folder is correctly placed
+
+// Serve static files
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Route to render employee data in EJS
+app.get('/employees', (req, res) => {
+    const sql = 'SELECT * FROM employee';
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error('Error fetching employees: ' + err.message);
+            return res.status(500).send('Internal Server Error');
+        }
+        res.render('employees', { employees: results });
+    });
+});
 
 
 // Start server on port 3000
