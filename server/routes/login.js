@@ -199,6 +199,18 @@ app.get('/employees', (req, res) => {
     });
 });
 
+//Deleting employee from table
+app.delete("/delete-employee/:id", (req, res) => {
+    const empId = req.params.id;
+    db.query("DELETE FROM employee WHERE emp_id = ?", [empId], (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.json({ success: false });
+        }
+        res.json({ success: true });
+    });
+});
+
 
 // Start server on port 3000
 app.listen(PORT, () => {
