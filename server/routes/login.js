@@ -180,14 +180,93 @@ app.get('/adminboard.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'adminboard.html'));
 });
 
-//EJS route for employee data
+// User Details Route [USER]
+app.get('/user-details', (req, res) => {
+    const user_id = req.session.userId; // Get user_id from session
+
+    db.query(
+        `SELECT user_id, first_name, last_name, email, phone_number, 
+                date_of_birth, address, date_joined 
+         FROM users 
+         WHERE user_id = ?`, 
+        [user_id], 
+        (err, results) => {
+            if (err) {
+                console.error("Error fetching user details:", err);
+                return res.status(500).send("Internal Server Error");
+            }
+
+            if (results.length === 0) {
+                return res.status(404).send("User not found");
+            }
+
+            res.render("userdata", { user: results[0] });
+        }
+    );
+});
+
+//Account details [USER]
+app.get('/account-details', (req, res) => {
+    const user_id = req.session.userId; // Get user_id from session
+
+    db.query(
+        `SELECT acc_id, account_type, balance, account_status, 
+                created_at, last_updated, branch_code 
+         FROM account 
+         WHERE user_id = ?`, 
+        [user_id], 
+        (err, results) => {
+            if (err) {
+                console.error("Error fetching account details:", err);
+                return res.status(500).send("Internal Server Error");
+            }
+
+            if (results.length === 0) {
+                return res.status(404).send("No account found for this user");
+            }
+
+            res.render("accdata", { account: results[0] });
+        }
+    );
+});
+
+
+
+
+//EJS route for employee data [ADMIN]
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views')); // Ensure your 'views' folder is correctly placed
 
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Route to render employee data in EJS
+
+// Route to render user data in EJS [ADMIN]
+app.get('/allusers', (req, res) => {
+    const sql = 'SELECT * FROM users';
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error('Error fetching user data:', err.message);
+            return res.status(500).send('Internal Server Error');
+        }
+        res.render('admin-userdata', { users: results });
+    });
+});
+
+// Route to render all account data in EJS [ADMIN]
+app.get('/allaccounts', (req, res) => {
+    const sql = 'SELECT * FROM account';
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error('Error fetching account data: ' + err.message);
+            return res.status(500).send('Internal Server Error');
+        }
+        res.render('admin-accountdata', { accounts: results });
+    });
+});
+
+
+// Route to render employee data in EJS [ADMIN]
 app.get('/employees', (req, res) => {
     const sql = 'SELECT * FROM employee';
     db.query(sql, (err, results) => {
@@ -199,7 +278,7 @@ app.get('/employees', (req, res) => {
     });
 });
 
-//Deleting employee from table
+//Deleting employee from table [ADMIN]
 app.delete("/delete-employee/:id", (req, res) => {
     const empId = req.params.id;
     db.query("DELETE FROM employee WHERE emp_id = ?", [empId], (err, result) => {

@@ -25,7 +25,8 @@
     font-size: 1.5rem;
     font-weight: bold;
     color: white;
-}
+    }
+
       </style>
 
     <script>
@@ -73,9 +74,13 @@
      <!-- Dashboard Options -->
       <div class="container mt-5">
      <div class="btn-group-vertical" role="group" aria-label="Vertical button group">
-        <button type="button" class="btn btn-light text-dark">Personal Details</button>
+        <button type="button" class="btn btn-light text-dark" onclick="window.location.href='/user-details'">
+            Personal Details
+        </button>
         <br/>
-        <button type="button" class="btn btn-light text-dark">Account Details</button>
+        <button type="button" class="btn btn-light text-dark" onclick="window.location.href='/account-details'">
+            Account Details
+        </button>
         <br/>
         <button type="button" class="btn btn-light text-dark">Transaction History</button>
         <br/>

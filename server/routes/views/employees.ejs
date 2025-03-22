@@ -13,9 +13,26 @@
         .text-center{
             color: white;
         }
+
+        .brand-name {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+    }
     </style>
 </head>
 <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <img src="./assets/images/bank-building.png" alt="Bank Logo" style="width: 40px; height: 40px;">
+                <span class="brand-name ml-2">Secure Bank</span>
+              </a>
+            <button id="logoutBtn" class="btn btn-danger">Logout</button>
+        </div>
+    </nav>
+
     <div class="container mt-5">
         <h1 class="text-center mb-4">Employee Data</h1>
         <table class="table table-bordered table-striped">
@@ -48,9 +65,21 @@
                 <% }) %>
             </tbody>
         </table>
+        <a href="/adminboard.html" class="btn btn-success">Back to Dashboard</a>
     </div>
 
     <script>
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+        const response = await fetch('/api/logout', { method: 'GET' });
+        const data = await response.json();
+
+        if (response.ok) {
+            window.location.href = data.redirect; 
+        } else {
+            alert('Logout failed. Try again.');
+        }
+    });
+
         //deleting employee
         function deleteEmployee(emp_id) {
             if (confirm("Are you sure you want to delete this employee?")) {

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Details</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background: linear-gradient(to right, #1E3A8A, #1565C0);
+        }
+        .user-card {
+            max-width: 600px;
+            margin: 50px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .brand-name {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+    }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <img src="./assets/images/bank-building.png" alt="Bank Logo" style="width: 40px; height: 40px;">
+                <span class="brand-name ml-2">Secure Bank</span>
+              </a>
+            <button id="logoutBtn" class="btn btn-danger">Logout</button>
+        </div>
+    </nav>
+
+<div class="container">
+    <div class="user-card">
+        <h3 class="text-center mb-4">User Details</h3>
+        <table class="table table-bordered">
+            <tr>
+                <th>User ID</th>
+                <td><%= user.user_id %></td>
+            </tr>
+            <tr>
+                <th>First Name</th>
+                <td><%= user.first_name %></td>
+            </tr>
+            <tr>
+                <th>Last Name</th>
+                <td><%= user.last_name %></td>
+            </tr>
+            <tr>
+                <th>Email</th>
+                <td><%= user.email %></td>
+            </tr>
+            <tr>
+                <th>Phone Number</th>
+                <td><%= user.phone_number %></td>
+            </tr>
+            <tr>
+                <th>Date of Birth</th>
+                <td><%= new Date(user.date_of_birth).toLocaleDateString('en-GB') %></td>
+            </tr>
+            <tr>
+                <th>Address</th>
+                <td><%= user.address %></td>
+            </tr>
+            <tr>
+                <th>Date Joined</th>
+                <td><%= new Date(user.date_joined).toISOString().split('T')[0] %></td>
+            </tr>
+        </table>
+        <a href="/userboard.html" class="btn btn-success w-100">Back to Dashboard</a>
+    </div>
+</div>
+
+<script>
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+        const response = await fetch('/api/logout', { method: 'GET' });
+        const data = await response.json();
+
+        if (response.ok) {
+            window.location.href = data.redirect; 
+        } else {
+            alert('Logout failed. Try again.');
+        }
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
