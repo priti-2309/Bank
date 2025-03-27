@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction History</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background: linear-gradient(to right, #1E3A8A, #1565C0);
+            color: white;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .transaction-card {
+            background: white;
+            color: black;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin-bottom: 15px;
+        }
+        .transaction-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .transaction-status {
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        .success { background-color: #28a745; color: white; }
+        .pending { background-color: #ffc107; color: black; }
+        .failed { background-color: #dc3545; color: white; }
+
+        .brand-name {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+    }
+    </style>
+</head>
+<body>
+     <!-- Navbar -->
+     <nav class="navbar navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <img src="./assets/images/bank-building.png" alt="Bank Logo" style="width: 40px; height: 40px;">
+                <span class="brand-name ml-2">Secure Bank</span>
+              </a>
+            <button id="logoutBtn" class="btn btn-danger">Logout</button>
+        </div>
+    </nav>
+
+<div class="container">
+    <h2 class="text-center mb-4">Transaction History</h2>
+
+    <% transactions.forEach(transaction => { %>
+        <div class="transaction-card">
+            <div class="transaction-header">
+                <span>Transaction ID: <%= transaction.transaction_id %></span>
+                <span class="transaction-status 
+                    <%= transaction.transaction_status === 'Success' ? 'success' : 
+                        (transaction.transaction_status === 'Pending' ? 'pending' : 'failed') %>">
+                    <%= transaction.transaction_status %>
+                </span>
+            </div>
+            <p><strong>Account ID:</strong> <%= transaction.acc_id %></p>
+            <p><strong>Type:</strong> <%= transaction.transaction_type %></p>
+            <p><strong>Date:</strong> <%= new Date(transaction.transaction_date).toLocaleString() %></p>
+            <p><strong>Amount:</strong> ₹<%= parseFloat(transaction.amount).toFixed(2) %></p>
+            <p><strong>Balance After:</strong> ₹<%= parseFloat(transaction.balance_after).toFixed(2) %></p>
+        </div>
+    <% }) %>
+
+    <a href="/userboard.html" class="btn btn-success w-100 mt-3">Back to Dashboard</a>
+</div>
+
+<script>
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+        const response = await fetch('/api/logout', { method: 'GET' });
+        const data = await response.json();
+
+        if (response.ok) {
+            window.location.href = data.redirect; 
+        } else {
+            alert('Logout failed. Try again.');
+        }
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

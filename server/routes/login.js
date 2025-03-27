@@ -230,6 +230,28 @@ app.get('/account-details', (req, res) => {
     );
 });
 
+//Transaction history [USER]
+app.get('/transactions', (req, res) => {
+    const user_id = req.session.userId; // Get user ID from session
+
+    const sql = `
+        SELECT t.transaction_id, t.acc_id, t.transaction_type, 
+               t.transaction_date, t.amount, t.balance_after, t.transaction_status
+        FROM transaction_history t
+        JOIN account a ON t.acc_id = a.acc_id  -- Link transactions to accounts
+        WHERE a.user_id = ?  -- Filter by logged-in user
+        ORDER BY t.transaction_date DESC`;
+
+    db.query(sql, [user_id], (err, results) => {
+        if (err) {
+            console.error('Error fetching transaction history:', err);
+            return res.status(500).send('Internal Server Error');
+        }
+        res.render('transaction', { transactions: results });
+    });
+});
+
+
 
 
 
@@ -277,6 +299,26 @@ app.get('/employees', (req, res) => {
         res.render('employees', { employees: results });
     });
 });
+
+//Transaction history [ADMIN]
+app.get('/all-transactions', (req, res) => {
+    const sql = `SELECT t.transaction_id, t.acc_id, t.transaction_type, t.transaction_date, 
+                        t.amount, t.balance_after, t.transaction_status, 
+                        u.first_name, u.last_name 
+                 FROM transaction_history t
+                 JOIN account a ON t.acc_id = a.acc_id
+                 JOIN users u ON a.user_id = u.user_id
+                 ORDER BY t.transaction_date DESC`;
+
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error('Error fetching transaction history: ' + err.message);
+            return res.status(500).send('Internal Server Error');
+        }
+        res.render('admin-transactions', { transactions: results });
+    });
+});
+
 
 //Deleting employee from table [ADMIN]
 app.delete("/delete-employee/:id", (req, res) => {
