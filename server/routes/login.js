@@ -251,6 +251,25 @@ app.get('/transactions', (req, res) => {
     });
 });
 
+//UPDATE PH NUM [USER]
+app.patch('/update-phone', (req, res) => {
+    const user_id = req.session.userId;
+    const { phone_number } = req.body;
+
+    if (!phone_number || !/^[789]\d{9}$/.test(phone_number)) {
+        return res.status(400).json({ success: false, message: "Invalid phone number format." });
+    }
+
+    const query = "UPDATE users SET phone_number = ? WHERE user_id = ?";
+    db.query(query, [phone_number, user_id], (err, result) => {
+        if (err) {
+            console.error("Error updating phone number:", err);
+            return res.status(500).json({ success: false, message: "Internal Server Error" });
+        }
+
+        res.json({ success: true, message: "Phone number updated successfully" });
+    });
+});
 
 
 
@@ -316,6 +335,18 @@ app.get('/all-transactions', (req, res) => {
             return res.status(500).send('Internal Server Error');
         }
         res.render('admin-transactions', { transactions: results });
+    });
+});
+
+// DELETE user by ID [ADMIN]
+app.delete("/delete-user/:id", (req, res) => {
+    const empId = req.params.id;
+    db.query("DELETE FROM users WHERE user_id = ?", [UserId], (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.json({ success: false });
+        }
+        res.json({ success: true });
     });
 });
 
